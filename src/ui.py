@@ -11,32 +11,40 @@ from src.greeks import calculate_greeks,  calculate_advanced_greeks
 from src.strategy import calculate_strategy_pnl, calculate_strategy_greeks, calculate_strategy_performance, var_calculator, stress_test_portfolio, risk_scenario_analysis
 from src.visualization import create_strategy_visualization,analyze_vol_surface
 
+# Page Configuration
+st.set_page_config(
+    page_title="Options Pricing Models",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+    
 # Display functions for the UI
 def display_option_prices(price_info):
     """Display option prices in a clean format"""
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"""
-            <div style="background-color: #90EE90; padding: 20px; border-radius: 10px; text-align: center;">
-                <h3 style="color: black; margin: 0;">CALL Value</h3>
-                <h2 style="color: black; margin: 10px 0;">{price_info['call']}</h2>
+            <div style="background-color: #077B09; padding: 5px; border-radius: 8px; text-align: center;">
+                <h3 style="color: white; margin: 3px;">CALL Value</h3>
+                <h2 style="color: white; margin: 3px 0;">{price_info['call']}</h2>
             </div>
         """, unsafe_allow_html=True)
 
     with col2:
         st.markdown(f"""
-            <div style="background-color: #FFB6C1; padding: 20px; border-radius: 10px; text-align: center;">
-                <h3 style="color: black; margin: 0;">PUT Value</h3>
-                <h2 style="color: black; margin: 10px 0;">{price_info['put']}</h2>
+            <div style="background-color: #F1592A; padding: 5px; border-radius: 8px; text-align: center;">
+                <h3 style="color: white; margin: 3px;">PUT Value</h3>
+                <h2 style="color: white; margin: 3px 0;">{price_info['put']}</h2>
             </div>
         """, unsafe_allow_html=True)
 
 def display_greeks(calculated_greeks):
     """Display Greeks in a minimal grid layout"""
     st.markdown(f"""
-        <div style="background-color: #1E1E1E; padding: 20px; border-radius: 10px;">
-            <h4 style="color: white; margin-bottom: 1rem;">Position Greeks</h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+        <div style="background-color: #1E1E1E; padding: 15px; border-radius: 10px;">
+            <h3 style="color: white; margin-bottom: 1rem;">Position Greeks</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
                 <div class="greek-card">
                     <div class="greek-label">Delta</div>
                     <div class="greek-value">{round(calculated_greeks['delta'], 3)}</div>
@@ -59,8 +67,37 @@ def display_greeks(calculated_greeks):
 
 # Setup sidebar inputs
 def setup_sidebar():
-    """Setup sidebar inputs and controls with quantitative research options"""
-    st.sidebar.markdown("## Model Selection")
+    # ✅ Inject CSS to increase font size and spacing in sidebar
+    st.sidebar.markdown("""
+        <style>
+        section[data-testid="stSidebar"] label,
+        section[data-testid="stSidebar"] input,
+        section[data-testid="stSidebar"] select,
+        section[data-testid="stSidebar"] div[data-baseweb="select"],
+        section[data-testid="stSidebar"] .stNumberInput,
+        section[data-testid="stSidebar"] .stCheckbox,
+        section[data-testid="stSidebar"] span {
+            font-size: 1.3rem !important;
+        }
+
+        /* Increase font size for titles and subtitles */
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
+            font-size: 2rem !important;}
+        section[data-testid="stSidebar"] p,
+        section[data-testid="stSidebar"] label {
+            font-size: 1.25rem !important;
+            //font-weight: 600 !important;
+        }
+
+        /* Increase spacing between widgets */
+        section[data-testid="stSidebar"] .stElementContainer {
+            margin-bottom: 0.5rem !important;
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.sidebar.markdown("# Model Selection")
     model_type = st.sidebar.selectbox(
         "Model Type",
         ["Black-Scholes", "Binomial", "Monte Carlo"],
@@ -85,7 +122,7 @@ def setup_sidebar():
     
     # Advanced options
     if st.sidebar.checkbox("Advanced Market Parameters", False):
-        st.sidebar.markdown("### Advanced Parameters")
+        st.sidebar.markdown("## Advanced Parameters")
         
         # Volatility term structure
         vol_term_structure = st.sidebar.checkbox("Use Volatility Term Structure", False)
@@ -128,13 +165,36 @@ def app():
     # Import all necessary libraries at the top level
     warnings.filterwarnings('ignore')
     
-    # Page Configuration
-    st.set_page_config(
-        page_title="Options Pricing Models",
-        page_icon="📊",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
+    # Custom Sidebar and Tabs CSS styles
+    st.markdown("""
+    <style>
+    /* Main page upward, reduce the blanks */
+    div[data-testid="stAppViewContainer"] {
+    margin-top: -4rem !important;
+    }
+    /* Adjust Sidebar width */
+    section[data-testid="stSidebar"] {
+        width: 500px !important;
+    }
+    div[data-testid="stSidebarContent"] {
+        padding: 9rem 1rem;
+    }
+
+    /* Adjust Tabs font size and padding */
+    /* Tabs distance from the above */
+    div[data-testid="stTabs"] {
+    margin-top: 20px !important;
+    }
+    button[data-baseweb="tab"] {
+    padding: 25px 25px !important;
+    }
+    button[data-baseweb="tab"] p {
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    margin: 5px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
     # CSS Styles
     st.markdown("""
@@ -142,22 +202,22 @@ def app():
         .greek-card {
             background-color: #2E2E2E;
             padding: 1rem;
-            border-radius: 0.5rem;
-            margin: 0.5rem;
+            border-radius: 1rem;
+            margin: 0.8rem;
         }
-        .greek-label { color: #9CA3AF; font-size: 0.875rem; }
-        .greek-value { color: white; font-size: 1.25rem; font-weight: 600; }
+        .greek-label { color: #9CA3AF; font-size: 1.2rem; font-weight: 500; }
+        .greek-value { color: white; font-size: 1.5rem; font-weight: 600; }
         .main { background-color: #0E1117; }
         </style>
     """, unsafe_allow_html=True)
 
     # Author Section
     st.markdown("""
-        <div style="background-color: #1E2124; padding: 15px; border-radius: 10px; width: fit-content; margin-bottom: 20px;">
-            <div style="color: #9CA3AF; font-size: 14px; margin-bottom: 8px;">Created by</div>
+        <div style="background-color: #1E2124; padding: 8px; border-radius: 8px; width: 200px; margin-bottom:20px;">
+            <div style="color: #9CA3AF; font-size: 18px; margin-bottom: 8px;">Created by</div>
             <div style="display: flex; align-items: center;">
                 <div style="margin-right: 15px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
                         <path fill="#0A66C2" d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 00.1.4V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path>
                     </svg>
                 </div>
@@ -171,7 +231,7 @@ def app():
         model_type, current_price, strike_price, time_to_maturity, volatility, risk_free_rate, model_params = setup_sidebar()
         
         # Title and model selection display
-        st.markdown(f"# 📈 {model_type} Option Pricing Model")
+        st.markdown(f"# {model_type} Option Pricing Model")
         
         # Calculate prices based on selected model
         with st.spinner("Calculating prices..."):
@@ -196,13 +256,13 @@ def app():
             if st.checkbox("Show Advanced Greeks"):
                 advanced_greeks = calculate_advanced_greeks("Call", current_price, strike_price,
                                                         time_to_maturity, risk_free_rate, volatility)
-                st.markdown("### Advanced Greeks")
+                st.markdown("## Advanced Greeks")
                 col1, col2 = st.columns(2)
                 with col1:
                     st.markdown(f"""
-                        <div style="background-color: #1E1E1E; padding: 20px; border-radius: 10px;">
-                            <h4 style="color: white;">Second-Order Greeks</h4>
-                            <ul style="color: white; list-style-type: none; padding-left: 0;">
+                        <div style="background-color: #1E1E1E; padding: 30px; border-radius: 10px;">
+                            <h3 style="color: white;">Second-Order Greeks</h3>
+                            <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.3rem;">
                                 <li>• Vanna: {advanced_greeks['vanna']:.4f} (Delta-Vega Sensitivity)</li>
                                 <li>• Charm: {advanced_greeks['charm']:.4f} (Delta Decay)</li>
                                 <li>• Volga: {advanced_greeks['volga']:.4f} (Vega Convexity)</li>
@@ -213,9 +273,9 @@ def app():
                 
                 with col2:
                     st.markdown(f"""
-                        <div style="background-color: #1E1E1E; padding: 20px; border-radius: 10px;">
-                            <h4 style="color: white;">Third-Order Greeks</h4>
-                            <ul style="color: white; list-style-type: none; padding-left: 0;">
+                        <div style="background-color: #1E1E1E; padding: 30px; border-radius: 10px;">
+                            <h3 style="color: white;">Third-Order Greeks</h3>
+                            <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.3rem;">
                                 <li>• Speed: {advanced_greeks['speed']:.4f} (Delta Acceleration)</li>
                                 <li>• Zomma: {advanced_greeks['zomma']:.4f} (Gamma-Volga)</li>
                                 <li>• Color: {advanced_greeks['color']:.4f} (Gamma Decay)</li>
