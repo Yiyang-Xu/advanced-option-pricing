@@ -13,7 +13,7 @@ from src.visualization import create_strategy_visualization,analyze_vol_surface
 
 # Page Configuration
 st.set_page_config(
-    page_title="Options Pricing Models",
+    page_title="Options Pricing",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -26,24 +26,24 @@ def display_option_prices(price_info):
     with col1:
         st.markdown(f"""
             <div style="background-color: #077B09; padding: 5px; border-radius: 8px; text-align: center;">
-                <h3 style="color: white; margin: 3px;">CALL Value</h3>
-                <h2 style="color: white; margin: 3px 0;">{price_info['call']}</h2>
+                <h4 style="color: white; margin: 3px;">CALL Value</h4>
+                <h3 style="color: white; margin: 3px 0;">{price_info['call']}</h3>
             </div>
         """, unsafe_allow_html=True)
 
     with col2:
         st.markdown(f"""
             <div style="background-color: #F1592A; padding: 5px; border-radius: 8px; text-align: center;">
-                <h3 style="color: white; margin: 3px;">PUT Value</h3>
-                <h2 style="color: white; margin: 3px 0;">{price_info['put']}</h2>
+                <h4 style="color: white; margin: 3px;">PUT Value</h4>
+                <h3 style="color: white; margin: 3px 0;">{price_info['put']}</h3>
             </div>
         """, unsafe_allow_html=True)
 
 def display_greeks(calculated_greeks):
     """Display Greeks in a minimal grid layout"""
     st.markdown(f"""
-        <div style="background-color: #1E1E1E; padding: 15px; border-radius: 10px;">
-            <h3 style="color: white; margin-bottom: 1rem;">Position Greeks</h3>
+        <div style="background-color: #1E1E1E; padding: 6px; border-radius: 10px;">
+            <h4 style="color: white; margin-bottom: -1rem; margin-left: 1rem;">Position Greeks</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
                 <div class="greek-card">
                     <div class="greek-label">Delta</div>
@@ -77,7 +77,7 @@ def setup_sidebar():
         section[data-testid="stSidebar"] .stNumberInput,
         section[data-testid="stSidebar"] .stCheckbox,
         section[data-testid="stSidebar"] span {
-            font-size: 1.3rem !important;
+            font-size: 1.2rem !important;
         }
 
         /* Increase font size for titles and subtitles */
@@ -87,17 +87,17 @@ def setup_sidebar():
             font-size: 2rem !important;}
         section[data-testid="stSidebar"] p,
         section[data-testid="stSidebar"] label {
-            font-size: 1.25rem !important;
+            font-size: 1.15rem !important;
             //font-weight: 600 !important;
         }
 
         /* Increase spacing between widgets */
         section[data-testid="stSidebar"] .stElementContainer {
-            margin-bottom: 0.5rem !important;
+            margin-bottom: 0.15rem !important;
         </style>
     """, unsafe_allow_html=True)
 
-    st.sidebar.markdown("# Model Selection")
+    st.sidebar.markdown("# Model Construction")
     model_type = st.sidebar.selectbox(
         "Model Type",
         ["Black-Scholes", "Binomial", "Monte Carlo"],
@@ -149,12 +149,12 @@ def setup_sidebar():
             }
         
         # Dividend yield
-        div_yield = st.sidebar.number_input("Dividend Yield", value=0.0, step=0.001, format="%.3f")
+        div_yield = st.sidebar.number_input("Dividend Yield", value=0.0, step=0.001, format="%.3f", key="div_yield_slider")
         if div_yield > 0:
             model_params['dividend_yield'] = div_yield
         
         # Market skew parameter
-        skew = st.sidebar.slider("Volatility Skew", -0.2, 0.2, 0.0, 0.01)
+        skew = st.sidebar.slider("Volatility Skew", -0.2, 0.2, 0.0, 0.01, key="vol_skew_slider")
         if skew != 0:
             model_params['skew'] = skew
     
@@ -177,7 +177,7 @@ def app():
         width: 500px !important;
     }
     div[data-testid="stSidebarContent"] {
-        padding: 9rem 1rem;
+        padding: 8rem 1rem;
     }
 
     /* Adjust Tabs font size and padding */
@@ -186,10 +186,10 @@ def app():
     margin-top: 20px !important;
     }
     button[data-baseweb="tab"] {
-    padding: 25px 25px !important;
+    padding: 25px 20px !important;
     }
     button[data-baseweb="tab"] p {
-    font-size: 22px !important;
+    font-size: 20px !important;
     font-weight: 600 !important;
     margin: 5px !important;
     }
@@ -205,23 +205,23 @@ def app():
             border-radius: 1rem;
             margin: 0.8rem;
         }
-        .greek-label { color: #9CA3AF; font-size: 1.2rem; font-weight: 500; }
-        .greek-value { color: white; font-size: 1.5rem; font-weight: 600; }
+        .greek-label { color: #9CA3AF; font-size: 1.15rem; font-weight: 500; }
+        .greek-value { color: white; font-size: 1.3rem; font-weight: 600; }
         .main { background-color: #0E1117; }
         </style>
     """, unsafe_allow_html=True)
 
     # Author Section
     st.markdown("""
-        <div style="background-color: #1E2124; padding: 8px; border-radius: 8px; width: 200px; margin-bottom:20px;">
-            <div style="color: #9CA3AF; font-size: 18px; margin-bottom: 8px;">Created by</div>
+        <div style="background-color: #1E2124; padding: 6px; border-radius: 6px; width: 150px; margin-bottom:10px;">
+            <div style="color: #9CA3AF; font-size: 15px; margin-bottom: 6px;">Created by</div>
             <div style="display: flex; align-items: center;">
                 <div style="margin-right: 15px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
                         <path fill="#0A66C2" d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 00.1.4V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path>
                     </svg>
                 </div>
-                <a href="https://www.linkedin.com/in/yiyang-xu-wq" target="_blank" style="color: white; text-decoration: none; font-size: 24px; font-weight: 500;">Yiyang Xu</a>
+                <a href="https://www.linkedin.com/in/yiyang-xu-wq" target="_blank" style="color: white; text-decoration: none; font-size: 20px; font-weight: 500;">Yiyang Xu</a>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -231,7 +231,7 @@ def app():
         model_type, current_price, strike_price, time_to_maturity, volatility, risk_free_rate, model_params = setup_sidebar()
         
         # Title and model selection display
-        st.markdown(f"# {model_type} Option Pricing Model")
+        st.markdown(f"## {model_type} Option Pricing Model")
         
         # Calculate prices based on selected model
         with st.spinner("Calculating prices..."):
@@ -256,13 +256,13 @@ def app():
             if st.checkbox("Show Advanced Greeks"):
                 advanced_greeks = calculate_advanced_greeks("Call", current_price, strike_price,
                                                         time_to_maturity, risk_free_rate, volatility)
-                st.markdown("## Advanced Greeks")
+                st.markdown("### Advanced Greeks")
                 col1, col2 = st.columns(2)
                 with col1:
                     st.markdown(f"""
                         <div style="background-color: #1E1E1E; padding: 30px; border-radius: 10px;">
-                            <h3 style="color: white;">Second-Order Greeks</h3>
-                            <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.3rem;">
+                            <h4 style="color: white;">Second-Order Greeks</h4>
+                            <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.15rem;">
                                 <li>• Vanna: {advanced_greeks['vanna']:.4f} (Delta-Vega Sensitivity)</li>
                                 <li>• Charm: {advanced_greeks['charm']:.4f} (Delta Decay)</li>
                                 <li>• Volga: {advanced_greeks['volga']:.4f} (Vega Convexity)</li>
@@ -274,8 +274,8 @@ def app():
                 with col2:
                     st.markdown(f"""
                         <div style="background-color: #1E1E1E; padding: 30px; border-radius: 10px;">
-                            <h3 style="color: white;">Third-Order Greeks</h3>
-                            <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.3rem;">
+                            <h4 style="color: white;">Third-Order Greeks</h4>
+                            <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.15rem;">
                                 <li>• Speed: {advanced_greeks['speed']:.4f} (Delta Acceleration)</li>
                                 <li>• Zomma: {advanced_greeks['zomma']:.4f} (Gamma-Volga)</li>
                                 <li>• Color: {advanced_greeks['color']:.4f} (Gamma Decay)</li>
@@ -288,7 +288,7 @@ def app():
             if model_type == "Monte Carlo" and paths_data:
                 call_paths, put_paths, n_steps = paths_data
 
-                st.subheader("Monte Carlo Simulation Paths")
+                st.markdown("### Monte Carlo Simulation Paths")
                 fig = plt.figure(figsize=(10, 6))
 
                 path_shape = call_paths[:100].T.shape
@@ -346,9 +346,9 @@ def app():
                     col1, col2 = st.columns(2)
                     with col1:
                         st.markdown(f"""
-                            <div style="background-color: #1E1E1E; padding: 20px; border-radius: 10px;">
-                                <h4 style="color: white;">Value-at-Risk Metrics</h4>
-                                <ul style="color: white; list-style-type: none; padding-left: 0;">
+                            <div style="background-color: #1E1E1E; padding: 30px; border-radius: 10px;">
+                                <h3 style="color: white;">Value-at-Risk Metrics</h3>
+                                <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.15rem;">
                                     <li>• VaR ({confidence*100:.1f}%): ${var_results['VaR']:.2f}</li>
                                     <li>• Expected Shortfall: ${var_results['Expected_Shortfall']:.2f}</li>
                                     <li>• Horizon: {var_results['Horizon_Days']:.0f} days</li>
@@ -360,9 +360,9 @@ def app():
 
                     with col2:
                         st.markdown(f"""
-                            <div style="background-color: #1E1E1E; padding: 20px; border-radius: 10px;">
-                                <h4 style="color: white;">Risk Distribution</h4>
-                                <ul style="color: white; list-style-type: none; padding-left: 0;">
+                            <div style="background-color: #1E1E1E; padding: 30px; border-radius: 10px;">
+                                <h3 style="color: white;">Risk Distribution</h3>
+                                <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.15rem;">
                                     <li>• Volatility: ${var_results['Volatility']:.2f}</li>
                                     <li>• Skewness: {var_results['Skewness']:.2f}</li>
                                     <li>• Kurtosis: {var_results['Kurtosis']:.2f}</li>
@@ -374,7 +374,7 @@ def app():
                         
                     # Add stress testing results if enabled
                     if stress_test_tab:
-                        st.subheader("Stress Test Results")
+                        st.markdown("### Stress Test Results")
                         with st.spinner("Running stress tests..."):
                             # Correct input values for stress_test_portfolio function
                             stress_results = stress_test_portfolio(
@@ -424,7 +424,6 @@ def app():
                                 }))
                                 
                                 # Create bar chart of stress test results
-                                # Create bar chart of stress test results
                                 fig = plt.figure(figsize=(12, 7))
                                 ax = plt.gca()
                                 bars = plt.bar(stress_df["Scenario"], stress_df["P&L"],
@@ -463,7 +462,7 @@ def app():
             put_strategies = ["Long Put", "Protective Put", "Bull Put Spread", "Bear Put Spread"]
             combined_strategies = ["Long Straddle", "Short Straddle", "Iron Butterfly", "Iron Condor"]
             
-            st.title("Options Strategy Analysis")
+            st.markdown("### Options Strategy Analysis")
             
             col1, col2 = st.columns([1, 2])
             with col1:
@@ -507,7 +506,7 @@ def app():
             st.pyplot(fig_pnl)
             
             # Display strategy greeks
-            st.subheader("Strategy Risk Profile")
+            st.markdown("### Strategy Risk Profile")
             calculated_greeks = calculate_strategy_greeks(
                 strategy, current_price, strike_price, time_to_maturity, risk_free_rate, volatility
             )
@@ -520,15 +519,15 @@ def app():
                     risk_free_rate, volatility, call_value, put_value
                 )
                 
-                st.subheader("Strategy Performance Metrics")
+                st.markdown("### Strategy Performance Metrics")
                 
                 # Profitability metrics
                 col1, col2 = st.columns(2)
                 with col1:
                     st.markdown(f"""
-                        <div style="background-color: #1E1E1E; padding: 20px; border-radius: 10px;">
+                        <div style="background-color: #1E1E1E; padding: 30px; border-radius: 10px;">
                             <h4 style="color: white;">Profitability Metrics</h4>
-                            <ul style="color: white; list-style-type: none; padding-left: 0;">
+                            <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.15rem;">
                                 <li>• Max Profit: ${perf_metrics['profitability']['max_profit']:.2f}</li>
                                 <li>• Max Loss: ${perf_metrics['profitability']['max_loss']:.2f}</li>
                                 <li>• Risk-Reward Ratio: {perf_metrics['profitability']['risk_reward_ratio']:.2f}</li>
@@ -539,9 +538,9 @@ def app():
                 
                 with col2:
                     st.markdown(f"""
-                        <div style="background-color: #1E1E1E; padding: 20px; border-radius: 10px;">
+                        <div style="background-color: #1E1E1E; padding: 30px; border-radius: 10px;">
                             <h4 style="color: white;">Risk Metrics</h4>
-                            <ul style="color: white; list-style-type: none; padding-left: 0;">
+                            <ul style="color: white; list-style-type: none; padding-left: 0; font-size: 1.15rem;">
                                 <li>• P&L Volatility: ${perf_metrics['risk_metrics']['pnl_volatility']:.2f}</li>
                                 <li>• Sharpe Ratio: {perf_metrics['risk_metrics']['sharpe_ratio']:.2f}</li>
                                 <li>• Kelly Criterion: {perf_metrics['risk_metrics']['kelly_criterion']:.1%}</li>
@@ -550,7 +549,7 @@ def app():
                     """, unsafe_allow_html=True)
         
         with quant_tab:
-            st.subheader("Quantitative Analysis")
+            st.markdown("## Quantitative Analysis")
             st.info("Select a quant tool to perform advanced analysis")
             
             quant_tool = st.selectbox(
@@ -559,7 +558,7 @@ def app():
             )
             
             if quant_tool == "Implied Volatility":
-                st.subheader("Implied Volatility Calculator")
+                st.markdown("### Implied Volatility Calculator")
                 
                 col1, col2 = st.columns(2)
                 with col1:
@@ -1118,28 +1117,28 @@ def app():
                 
                 col1, col2 = st.columns(2)
                 with col1:
-                    confidence = st.slider("Confidence Level", 0.9, 0.99, 0.95, 0.01)
-                    horizon = st.slider("Risk Horizon (days)", 1, 30, 1) / 252  # Convert to years
+                    confidence = st.slider("Confidence Level", 0.9, 0.99, 0.95, 0.01, key="confidence_level_slider")
+                    horizon = st.slider("Risk Horizon (days)", 1, 30, 1, key="risk_horizon_slider") / 252  # Convert to years
                 
                 with col2:
-                    n_simulations = st.slider("Number of Simulations", 1000, 100000, 10000, 1000)
-                    strategy_type = st.selectbox("Position Type", ["Long Call", "Long Put", "Covered Call Writing", "Protective Put"])
+                    n_simulations = st.slider("Number of Simulations", 1000, 100000, 10000, 1000, key="n_simulations_slider")
+                    strategy_type = st.selectbox("Position Type", ["Long Call", "Long Put", "Covered Call Writing", "Protective Put"], key="strategy_type_checkbox")
                 
                 # Add enhanced VaR options
                 use_t_dist = st.checkbox("Use Student's t-distribution (fat tails)", True,
-                                      help="Better captures extreme market events than normal distribution")
+                                      help="Better captures extreme market events than normal distribution", key="use_t_dist_checkbox")
                 if use_t_dist:
                     degrees_of_freedom = st.slider("Degrees of Freedom", 3, 10, 5, 1,
-                                                 help="Lower values create fatter tails (3-5 for financial markets)")
+                                                 help="Lower values create fatter tails (3-5 for financial markets)", key="degrees_of_freedom_slider")
                 else:
                     degrees_of_freedom = 5
 
                 use_garch = st.checkbox("Use GARCH volatility modeling", False,
-                                      help="Models time-varying volatility instead of constant volatility")
+                                      help="Models time-varying volatility instead of constant volatility", key="use_garch_checkbox")
                 
                 # Add stress testing option
                 stress_test_tab = st.checkbox("Include Stress Testing", False,
-                                           help="Test portfolio against historical crisis scenarios")
+                                           help="Test portfolio against historical crisis scenarios", key="stress_test_checkbox")
                 
                 if st.button("Calculate VaR"):
                     with st.spinner("Running VaR simulation..."):
