@@ -25,7 +25,7 @@ def display_option_prices(price_info):
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"""
-            <div style="background-color: #077B09; padding: 5px; border-radius: 8px; text-align: center;">
+            <div style="background-color: #077B09; padding: 8px; border-radius: 8px; text-align: center;">
                 <h4 style="color: white; margin: 3px;">CALL Value</h4>
                 <h3 style="color: white; margin: 3px 0;">{price_info['call']}</h3>
             </div>
@@ -33,7 +33,7 @@ def display_option_prices(price_info):
 
     with col2:
         st.markdown(f"""
-            <div style="background-color: #F1592A; padding: 5px; border-radius: 8px; text-align: center;">
+            <div style="background-color: #F1592A; padding: 8px; border-radius: 8px; text-align: center;">
                 <h4 style="color: white; margin: 3px;">PUT Value</h4>
                 <h3 style="color: white; margin: 3px 0;">{price_info['put']}</h3>
             </div>
@@ -169,8 +169,24 @@ def app():
     st.markdown("""
     <style>
     /* Main page upward, reduce the blanks */
+    /*
     div[data-testid="stAppViewContainer"] {
     margin-top: -4rem !important;
+    } */
+    <style>
+    /* ✅ 主页面内容强制居中（非 Sidebar） */
+    section[data-testid="stAppViewContainer"] > div {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    
+    /* ✅ 可选：统一顶边距，避免跳动 */
+    section[data-testid="stAppViewContainer"] {
+        margin-top: 0 !important;
+        padding-top: 1.5rem !important;
     }
     /* Adjust Sidebar width */
     section[data-testid="stSidebar"] {
@@ -213,7 +229,7 @@ def app():
 
     # Author Section
     st.markdown("""
-        <div style="background-color: #1E2124; padding: 6px; border-radius: 6px; width: 150px; margin-bottom:10px;">
+        <div style="background-color: #1E2124; padding: 6px; border-radius: 6px; width: 150px; margin-bottom:8px;">
             <div style="color: #9CA3AF; font-size: 15px; margin-bottom: 6px;">Created by</div>
             <div style="display: flex; align-items: center;">
                 <div style="margin-right: 15px;">
