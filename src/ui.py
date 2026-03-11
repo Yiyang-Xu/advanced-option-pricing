@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import date, timedelta
 from scipy.stats import norm
 from scipy.interpolate import RectBivariateSpline, interp1d, SmoothBivariateSpline, Rbf, griddata
 import warnings
@@ -11,6 +10,7 @@ from src.option_pricing import calculate_option_prices, enhanced_local_volatilit
 from src.greeks import calculate_greeks,  calculate_advanced_greeks
 from src.strategy import calculate_strategy_pnl, calculate_strategy_greeks, calculate_strategy_performance, var_calculator, stress_test_portfolio, risk_scenario_analysis
 from src.visualization import create_strategy_visualization,analyze_vol_surface
+from src.components.sidebar import render_sidebar
 
 APP_CONTENT_MAX_WIDTH = "1100px"
 APP_MAIN_TOP_PADDING = "0.25rem"
@@ -69,126 +69,6 @@ def display_greeks(calculated_greeks):
             </div>
         </div>
     """, unsafe_allow_html=True)
-
-# Setup sidebar inputs
-def setup_sidebar():
-    # ✅ Inject CSS to increase font size and spacing in sidebar
-    st.sidebar.markdown("""
-        <style>
-        section[data-testid="stSidebar"] label,
-        section[data-testid="stSidebar"] input,
-        section[data-testid="stSidebar"] select,
-        section[data-testid="stSidebar"] div[data-baseweb="select"],
-        section[data-testid="stSidebar"] .stNumberInput,
-        section[data-testid="stSidebar"] .stCheckbox,
-        section[data-testid="stSidebar"] span {
-            font-size: 1.2rem !important;
-        }
-
-        /* Increase font size for titles and subtitles */
-        section[data-testid="stSidebar"] h1,
-        section[data-testid="stSidebar"] h2,
-        section[data-testid="stSidebar"] h3 {
-            font-size: 2rem !important;}
-        section[data-testid="stSidebar"] p,
-        section[data-testid="stSidebar"] label {
-            font-size: 1.15rem !important;
-            //font-weight: 600 !important;
-        }
-
-        /* Increase spacing between widgets */
-        section[data-testid="stSidebar"] .stElementContainer {
-            margin-bottom: 0.15rem !important;
-        </style>
-    """, unsafe_allow_html=True)
-
-    st.sidebar.markdown("""
-        <style>
-        section[data-testid="stSidebar"] [data-testid="stMetricLabel"] {
-            font-size: 1.0rem !important;
-        }
-
-        section[data-testid="stSidebar"] [data-testid="stMetricValue"] {
-            font-size: 1.5rem !important;
-            line-height: 1.05 !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    st.sidebar.markdown("# Trade Setup")
-    model_type = st.sidebar.selectbox(
-        "Model Type",
-        ["Black-Scholes", "Binomial", "Monte Carlo"],
-        index=0
-    )
-
-    st.sidebar.markdown("## Contract Details")
-    strike_price = st.sidebar.number_input("Strike Price", value=100.00, step=0.01, format="%.2f")
-
-    default_trade_date = date.today()
-    default_expiry_date = default_trade_date + timedelta(days=365)
-    trade_date = st.sidebar.date_input("Trade Date", value=default_trade_date)
-    expiry_date = st.sidebar.date_input("Expiry Date", value=default_expiry_date, min_value=trade_date)
-
-    days_to_expiry = max((expiry_date - trade_date).days, 0)
-    time_to_maturity = max(days_to_expiry / 365.0, 0.0)
-
-    days_col, years_col = st.sidebar.columns(2)
-    days_col.metric("Days Remaining", f"{days_to_expiry}")
-    years_col.metric("Year Fraction", f"{time_to_maturity:.4f}")
-
-    st.sidebar.markdown("## Market Inputs")
-    current_price = st.sidebar.number_input("Spot Price", value=100.00, step=0.01, format="%.2f")
-    volatility = st.sidebar.number_input("Volatility (σ)", value=0.20, step=0.01, format="%.2f")
-    risk_free_rate = st.sidebar.number_input("Risk-Free Rate", value=0.05, step=0.01, format="%.2f")
-    
-    # Model-specific parameters
-    model_params = {}
-    if model_type == "Binomial":
-        model_params['steps'] = st.sidebar.slider("Number of Steps", 10, 1000, 100)
-        model_params['option_style'] = st.sidebar.selectbox("Option Style", ["European", "American"])
-    elif model_type == "Monte Carlo":
-        model_params['n_simulations'] = st.sidebar.slider("Number of Simulations", 1000, 50000, 10000)
-        model_params['n_steps'] = st.sidebar.slider("Time Steps", 50, 500, 100)
-    
-    # Advanced options
-    st.sidebar.markdown("## Advanced Settings")
-    with st.sidebar.expander("Advanced Market Parameters", expanded=False):
-        # Volatility term structure
-        vol_term_structure = st.checkbox("Use Volatility Term Structure", False)
-        if vol_term_structure:
-            vol_3m = st.number_input("3-Month Volatility", value=volatility*0.9, step=0.01, format="%.2f")
-            vol_6m = st.number_input("6-Month Volatility", value=volatility, step=0.01, format="%.2f")
-            vol_12m = st.number_input("12-Month Volatility", value=volatility*1.1, step=0.01, format="%.2f")
-            model_params['vol_term_structure'] = {
-                0.25: vol_3m,
-                0.5: vol_6m,
-                1.0: vol_12m
-            }
-
-        # Interest rate term structure
-        rate_term_structure = st.checkbox("Use Rate Term Structure", False)
-        if rate_term_structure:
-            rate_3m = st.number_input("3-Month Rate", value=risk_free_rate*0.8, step=0.001, format="%.3f")
-            rate_6m = st.number_input("6-Month Rate", value=risk_free_rate, step=0.001, format="%.3f")
-            rate_12m = st.number_input("12-Month Rate", value=risk_free_rate*1.2, step=0.001, format="%.3f")
-            model_params['rate_term_structure'] = {
-                0.25: rate_3m,
-                0.5: rate_6m,
-                1.0: rate_12m
-            }
-
-        # Dividend yield
-        div_yield = st.number_input("Dividend Yield", value=0.0, step=0.001, format="%.3f", key="div_yield_slider")
-        if div_yield > 0:
-            model_params['dividend_yield'] = div_yield
-
-        # Market skew parameter
-        skew = st.slider("Volatility Skew", -0.2, 0.2, 0.0, 0.01, key="vol_skew_slider")
-        if skew != 0:
-            model_params['skew'] = skew
-    
-    return model_type, current_price, strike_price, time_to_maturity, volatility, risk_free_rate, model_params
 
 def app():
     """Main application execution flow"""
@@ -286,7 +166,14 @@ def app():
     
     try:
         # Setup sidebar and get parameters
-        model_type, current_price, strike_price, time_to_maturity, volatility, risk_free_rate, model_params = setup_sidebar()
+        sidebar = render_sidebar()
+        model_type = sidebar.model_type
+        current_price = sidebar.current_price
+        strike_price = sidebar.strike_price
+        time_to_maturity = sidebar.time_to_maturity
+        volatility = sidebar.volatility
+        risk_free_rate = sidebar.risk_free_rate
+        model_params = sidebar.model_params
         
         # Title and model selection display
         st.markdown(f'<div class="hero-title"><h2>{model_type} Option Pricing Model</h2></div>', unsafe_allow_html=True)
