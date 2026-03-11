@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import date, timedelta
 from scipy.stats import norm
 from scipy.interpolate import RectBivariateSpline, interp1d, SmoothBivariateSpline, Rbf, griddata
 import warnings
@@ -13,7 +14,7 @@ from src.visualization import create_strategy_visualization,analyze_vol_surface
 
 APP_CONTENT_MAX_WIDTH = "1100px"
 APP_MAIN_TOP_PADDING = "0.25rem"
-APP_SIDEBAR_TOP_PADDING = "4.5rem"
+APP_SIDEBAR_TOP_PADDING = "2rem"
 
 # Page Configuration
 st.set_page_config(
@@ -101,19 +102,45 @@ def setup_sidebar():
         </style>
     """, unsafe_allow_html=True)
 
-    st.sidebar.markdown("# Model Construction")
+    st.sidebar.markdown("""
+        <style>
+        section[data-testid="stSidebar"] [data-testid="stMetricLabel"] {
+            font-size: 1.0rem !important;
+        }
+
+        section[data-testid="stSidebar"] [data-testid="stMetricValue"] {
+            font-size: 1.5rem !important;
+            line-height: 1.05 !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.sidebar.markdown("# Trade Setup")
     model_type = st.sidebar.selectbox(
         "Model Type",
         ["Black-Scholes", "Binomial", "Monte Carlo"],
         index=0
     )
-    
-    # Basic input parameters
-    current_price = st.sidebar.number_input("Current Asset Price", value=100.00, step=0.01, format="%.2f")
+
+    st.sidebar.markdown("## Contract Details")
     strike_price = st.sidebar.number_input("Strike Price", value=100.00, step=0.01, format="%.2f")
-    time_to_maturity = st.sidebar.number_input("Time to Maturity (Years)", value=1.00, step=0.01, format="%.2f")
+
+    default_trade_date = date.today()
+    default_expiry_date = default_trade_date + timedelta(days=365)
+    trade_date = st.sidebar.date_input("Trade Date", value=default_trade_date)
+    expiry_date = st.sidebar.date_input("Expiry Date", value=default_expiry_date, min_value=trade_date)
+
+    days_to_expiry = max((expiry_date - trade_date).days, 0)
+    time_to_maturity = max(days_to_expiry / 365.0, 0.0)
+
+    days_col, years_col = st.sidebar.columns(2)
+    days_col.metric("Days Remaining", f"{days_to_expiry}")
+    years_col.metric("Year Fraction", f"{time_to_maturity:.4f}")
+
+    st.sidebar.markdown("## Market Inputs")
+    current_price = st.sidebar.number_input("Spot Price", value=100.00, step=0.01, format="%.2f")
     volatility = st.sidebar.number_input("Volatility (σ)", value=0.20, step=0.01, format="%.2f")
-    risk_free_rate = st.sidebar.number_input("Risk-Free Interest Rate", value=0.05, step=0.01, format="%.2f")
+    risk_free_rate = st.sidebar.number_input("Risk-Free Rate", value=0.05, step=0.01, format="%.2f")
     
     # Model-specific parameters
     model_params = {}
@@ -125,40 +152,39 @@ def setup_sidebar():
         model_params['n_steps'] = st.sidebar.slider("Time Steps", 50, 500, 100)
     
     # Advanced options
-    if st.sidebar.checkbox("Advanced Market Parameters", False):
-        st.sidebar.markdown("## Advanced Parameters")
-        
+    st.sidebar.markdown("## Advanced Settings")
+    with st.sidebar.expander("Advanced Market Parameters", expanded=False):
         # Volatility term structure
-        vol_term_structure = st.sidebar.checkbox("Use Volatility Term Structure", False)
+        vol_term_structure = st.checkbox("Use Volatility Term Structure", False)
         if vol_term_structure:
-            vol_3m = st.sidebar.number_input("3-Month Volatility", value=volatility*0.9, step=0.01, format="%.2f")
-            vol_6m = st.sidebar.number_input("6-Month Volatility", value=volatility, step=0.01, format="%.2f")
-            vol_12m = st.sidebar.number_input("12-Month Volatility", value=volatility*1.1, step=0.01, format="%.2f")
+            vol_3m = st.number_input("3-Month Volatility", value=volatility*0.9, step=0.01, format="%.2f")
+            vol_6m = st.number_input("6-Month Volatility", value=volatility, step=0.01, format="%.2f")
+            vol_12m = st.number_input("12-Month Volatility", value=volatility*1.1, step=0.01, format="%.2f")
             model_params['vol_term_structure'] = {
                 0.25: vol_3m,
                 0.5: vol_6m,
                 1.0: vol_12m
             }
-        
+
         # Interest rate term structure
-        rate_term_structure = st.sidebar.checkbox("Use Rate Term Structure", False)
+        rate_term_structure = st.checkbox("Use Rate Term Structure", False)
         if rate_term_structure:
-            rate_3m = st.sidebar.number_input("3-Month Rate", value=risk_free_rate*0.8, step=0.001, format="%.3f")
-            rate_6m = st.sidebar.number_input("6-Month Rate", value=risk_free_rate, step=0.001, format="%.3f")
-            rate_12m = st.sidebar.number_input("12-Month Rate", value=risk_free_rate*1.2, step=0.001, format="%.3f")
+            rate_3m = st.number_input("3-Month Rate", value=risk_free_rate*0.8, step=0.001, format="%.3f")
+            rate_6m = st.number_input("6-Month Rate", value=risk_free_rate, step=0.001, format="%.3f")
+            rate_12m = st.number_input("12-Month Rate", value=risk_free_rate*1.2, step=0.001, format="%.3f")
             model_params['rate_term_structure'] = {
                 0.25: rate_3m,
                 0.5: rate_6m,
                 1.0: rate_12m
             }
-        
+
         # Dividend yield
-        div_yield = st.sidebar.number_input("Dividend Yield", value=0.0, step=0.001, format="%.3f", key="div_yield_slider")
+        div_yield = st.number_input("Dividend Yield", value=0.0, step=0.001, format="%.3f", key="div_yield_slider")
         if div_yield > 0:
             model_params['dividend_yield'] = div_yield
-        
+
         # Market skew parameter
-        skew = st.sidebar.slider("Volatility Skew", -0.2, 0.2, 0.0, 0.01, key="vol_skew_slider")
+        skew = st.slider("Volatility Skew", -0.2, 0.2, 0.0, 0.01, key="vol_skew_slider")
         if skew != 0:
             model_params['skew'] = skew
     
