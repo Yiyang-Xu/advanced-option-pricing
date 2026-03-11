@@ -11,6 +11,8 @@ from src.greeks import calculate_greeks,  calculate_advanced_greeks
 from src.strategy import calculate_strategy_pnl, calculate_strategy_greeks, calculate_strategy_performance, var_calculator, stress_test_portfolio, risk_scenario_analysis
 from src.visualization import create_strategy_visualization,analyze_vol_surface
 
+APP_CONTENT_MAX_WIDTH = "1200px"
+
 # Page Configuration
 st.set_page_config(
     page_title="Options Pricing",
@@ -166,49 +168,43 @@ def app():
     warnings.filterwarnings('ignore')
     
     # Custom Sidebar and Tabs CSS styles
-    st.markdown("""
+    st.markdown(f"""
     <style>
-    /* Main page upward, reduce the blanks */
-    /*
-    div[data-testid="stAppViewContainer"] {
-    margin-top: -4rem !important;
-    } */
-    <style>
-    /* ✅ 主页面内容强制居中（非 Sidebar） */
-    section[data-testid="stAppViewContainer"] > div {
-        max-width: 1200px;
+    /* Keep a stable, explicit width on Streamlit's main content container. */
+    div[data-testid="stMainBlockContainer"] {{
+        max-width: {APP_CONTENT_MAX_WIDTH} !important;
         margin-left: auto;
         margin-right: auto;
         padding-left: 1.5rem;
         padding-right: 1.5rem;
-    }
-    
-    /* ✅ 可选：统一顶边距，避免跳动 */
-    section[data-testid="stAppViewContainer"] {
-        margin-top: 0 !important;
+    }}
+
+    /* Normalize top spacing without resizing the overall app shell. */
+    section[data-testid="stAppViewContainer"] [data-testid="stMain"] {{
         padding-top: 1.5rem !important;
-    }
+    }}
+
     /* Adjust Sidebar width */
-    section[data-testid="stSidebar"] {
+    section[data-testid="stSidebar"] {{
         width: 500px !important;
-    }
-    div[data-testid="stSidebarContent"] {
+    }}
+    div[data-testid="stSidebarContent"] {{
         padding: 8rem 1rem;
-    }
+    }}
 
     /* Adjust Tabs font size and padding */
     /* Tabs distance from the above */
-    div[data-testid="stTabs"] {
+    div[data-testid="stTabs"] {{
     margin-top: 20px !important;
-    }
-    button[data-baseweb="tab"] {
+    }}
+    button[data-baseweb="tab"] {{
     padding: 25px 20px !important;
-    }
-    button[data-baseweb="tab"] p {
+    }}
+    button[data-baseweb="tab"] p {{
     font-size: 20px !important;
     font-weight: 600 !important;
     margin: 5px !important;
-    }
+    }}
     </style>
     """, unsafe_allow_html=True)
 
