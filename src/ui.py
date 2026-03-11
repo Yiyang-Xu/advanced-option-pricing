@@ -11,7 +11,9 @@ from src.greeks import calculate_greeks,  calculate_advanced_greeks
 from src.strategy import calculate_strategy_pnl, calculate_strategy_greeks, calculate_strategy_performance, var_calculator, stress_test_portfolio, risk_scenario_analysis
 from src.visualization import create_strategy_visualization,analyze_vol_surface
 
-APP_CONTENT_MAX_WIDTH = "1200px"
+APP_CONTENT_MAX_WIDTH = "1100px"
+APP_MAIN_TOP_PADDING = "0.25rem"
+APP_SIDEBAR_TOP_PADDING = "4.5rem"
 
 # Page Configuration
 st.set_page_config(
@@ -27,7 +29,7 @@ def display_option_prices(price_info):
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"""
-            <div style="background-color: #077B09; padding: 8px; border-radius: 8px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #0a8f0c 0%, #077B09 100%); padding: 10px; border-radius: 14px; text-align: center; box-shadow: 0 10px 28px rgba(7, 123, 9, 0.18);">
                 <h4 style="color: white; margin: 3px;">CALL Value</h4>
                 <h3 style="color: white; margin: 3px 0;">{price_info['call']}</h3>
             </div>
@@ -35,7 +37,7 @@ def display_option_prices(price_info):
 
     with col2:
         st.markdown(f"""
-            <div style="background-color: #F1592A; padding: 8px; border-radius: 8px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #ff6b35 0%, #F1592A 100%); padding: 10px; border-radius: 14px; text-align: center; box-shadow: 0 10px 28px rgba(241, 89, 42, 0.18);">
                 <h4 style="color: white; margin: 3px;">PUT Value</h4>
                 <h3 style="color: white; margin: 3px 0;">{price_info['put']}</h3>
             </div>
@@ -181,7 +183,7 @@ def app():
 
     /* Normalize top spacing without resizing the overall app shell. */
     section[data-testid="stAppViewContainer"] [data-testid="stMain"] {{
-        padding-top: 1.5rem !important;
+        padding-top: {APP_MAIN_TOP_PADDING} !important;
     }}
 
     /* Adjust Sidebar width */
@@ -189,13 +191,13 @@ def app():
         width: 500px !important;
     }}
     div[data-testid="stSidebarContent"] {{
-        padding: 8rem 1rem;
+        padding: {APP_SIDEBAR_TOP_PADDING} 1rem 1.5rem;
     }}
 
     /* Adjust Tabs font size and padding */
     /* Tabs distance from the above */
     div[data-testid="stTabs"] {{
-    margin-top: 20px !important;
+    margin-top: 10px !important;
     }}
     button[data-baseweb="tab"] {{
     padding: 25px 20px !important;
@@ -220,12 +222,30 @@ def app():
         .greek-label { color: #9CA3AF; font-size: 1.15rem; font-weight: 500; }
         .greek-value { color: white; font-size: 1.3rem; font-weight: 600; }
         .main { background-color: #0E1117; }
+        .hero-meta {
+            display: inline-block;
+            background: rgba(30, 33, 36, 0.9);
+            padding: 0.65rem 0.85rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 0.35rem;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+        }
+        .hero-title {
+            margin: 0.1rem 0 0.75rem 0;
+        }
+        .hero-title h2 {
+            margin: 0 !important;
+            font-size: 2.35rem;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
         </style>
     """, unsafe_allow_html=True)
 
     # Author Section
     st.markdown("""
-        <div style="background-color: #1E2124; padding: 6px; border-radius: 6px; width: 150px; margin-bottom:8px;">
+        <div class="hero-meta">
             <div style="color: #9CA3AF; font-size: 15px; margin-bottom: 6px;">Created by</div>
             <div style="display: flex; align-items: center;">
                 <div style="margin-right: 15px;">
@@ -243,7 +263,7 @@ def app():
         model_type, current_price, strike_price, time_to_maturity, volatility, risk_free_rate, model_params = setup_sidebar()
         
         # Title and model selection display
-        st.markdown(f"## {model_type} Option Pricing Model")
+        st.markdown(f'<div class="hero-title"><h2>{model_type} Option Pricing Model</h2></div>', unsafe_allow_html=True)
         
         # Calculate prices based on selected model
         with st.spinner("Calculating prices..."):
