@@ -1,14 +1,11 @@
 /* Import Google Fonts: (PT Serif) */
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
-/* Global override */
-html, body, .stApp, [class*="st-"], div, p, span, label, input, select, textarea, button {
+/* Keep the serif font for actual content, but don't override icon fonts. */
+html, body, .stApp,
+h1, h2, h3, h4, h5, h6,
+p, label, input, select, textarea,
+[data-testid="stMarkdownContainer"],
+[data-testid="stMarkdownContainer"] * {
     font-family: 'PT Serif', serif !important;
 }
-
-/* Specific to Markdown blocks (optional, may be redundant now) */
-.stMarkdown, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3,
-.stMarkdown h4, .stMarkdown h5, .stMarkdown h6, .stMarkdown p {
-    font-family: 'PT Serif', serif !important;
-}
-
