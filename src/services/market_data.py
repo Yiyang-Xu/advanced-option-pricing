@@ -15,6 +15,13 @@ class MarketRateQuote:
     source: str
 
 
+@dataclass(frozen=True)
+class MarketSpotQuote:
+    price: float
+    symbol: str
+    source: str
+
+
 def calculate_time_to_expiry(trade_date: date, expiry_date: date) -> tuple[int, float]:
     days_to_expiry = max((expiry_date - trade_date).days, 0)
     return days_to_expiry, max(days_to_expiry / 365.0, 0.0)
@@ -56,4 +63,25 @@ def get_yahoo_risk_free_rate(time_to_maturity: float) -> MarketRateQuote:
         rate=latest_close / 100.0,
         label=label,
         source=f"Yahoo Finance {symbol}",
+    )
+
+
+@st.cache_data(ttl=900, show_spinner=False)
+def get_yahoo_spot_price(symbol: str) -> MarketSpotQuote:
+    normalized_symbol = symbol.strip().upper()
+    if not normalized_symbol:
+        raise ValueError("Ticker is required")
+
+    history = yf.Ticker(normalized_symbol).history(period="5d", interval="1d")
+    if history.empty:
+        raise ValueError(f"No Yahoo Finance data returned for {normalized_symbol}")
+
+    latest_close = float(history["Close"].dropna().iloc[-1])
+    if math.isnan(latest_close):
+        raise ValueError(f"Latest Yahoo Finance close is NaN for {normalized_symbol}")
+
+    return MarketSpotQuote(
+        price=latest_close,
+        symbol=normalized_symbol,
+        source=f"Yahoo Finance {normalized_symbol}",
     )

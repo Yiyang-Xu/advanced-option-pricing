@@ -5,11 +5,13 @@ from datetime import date, timedelta
 
 import streamlit as st
 
-from src.services.market_data import calculate_time_to_expiry, get_yahoo_risk_free_rate
+from src.services.market_data import calculate_time_to_expiry, get_yahoo_risk_free_rate, get_yahoo_spot_price
 
 
 @dataclass(frozen=True)
 class SidebarConfig:
+    setup_mode: str
+    ticker: str | None
     model_type: str
     current_price: float
     strike_price: float
@@ -63,6 +65,11 @@ def render_sidebar() -> SidebarConfig:
     _inject_sidebar_styles()
 
     st.sidebar.markdown("# Trade Setup")
+    setup_mode = st.sidebar.radio(
+        "Setup Mode",
+        ["Manual Entry", "Ticker Analysis"],
+        horizontal=True,
+    )
     model_type = st.sidebar.selectbox(
         "Model Type",
         ["Black-Scholes", "Binomial", "Monte Carlo"],
@@ -83,19 +90,32 @@ def render_sidebar() -> SidebarConfig:
     years_col.metric("Year Fraction", f"{time_to_maturity:.4f}")
 
     st.sidebar.markdown("## Market Inputs")
-    current_price = st.sidebar.number_input("Spot Price", value=100.00, step=0.01, format="%.2f")
+    ticker = None
+    if setup_mode == "Ticker Analysis":
+        ticker = st.sidebar.text_input("Ticker", value="AAPL").strip().upper()
+        try:
+            spot_quote = get_yahoo_spot_price(ticker)
+            current_price = spot_quote.price
+            st.sidebar.caption(f"Spot auto-filled from {spot_quote.source}.")
+            st.sidebar.metric("Spot Price", f"{current_price:.2f}")
+        except Exception as exc:
+            st.sidebar.warning(f"Yahoo Finance fetch failed: {exc}. Falling back to manual spot input.")
+            current_price = st.sidebar.number_input("Spot Price", value=100.00, step=0.01, format="%.2f")
+    else:
+        current_price = st.sidebar.number_input("Spot Price", value=100.00, step=0.01, format="%.2f")
+
     volatility = st.sidebar.number_input("Volatility (σ)", value=0.20, step=0.01, format="%.2f")
 
     rate_source = st.sidebar.radio(
         "Risk-Free Rate Source",
-        ["Yahoo Finance (Auto)", "Manual"],
+        ["Yahoo Finance (Auto)", "Manual"] if setup_mode == "Ticker Analysis" else ["Manual", "Yahoo Finance (Auto)"],
         horizontal=True,
     )
     if rate_source == "Yahoo Finance (Auto)":
         try:
             rate_quote = get_yahoo_risk_free_rate(time_to_maturity)
             risk_free_rate = rate_quote.rate
-            st.sidebar.caption(f"Auto-filled from {rate_quote.source} ({rate_quote.label}).")
+            st.sidebar.caption(f"Auto-filled from {rate_quote.label}.")
             st.sidebar.metric("Risk-Free Rate", f"{risk_free_rate:.2%}")
         except Exception as exc:
             st.sidebar.warning(f"Yahoo Finance fetch failed: {exc}. Falling back to manual input.")
@@ -144,6 +164,8 @@ def render_sidebar() -> SidebarConfig:
             model_params["skew"] = skew
 
     return SidebarConfig(
+        setup_mode=setup_mode,
+        ticker=ticker,
         model_type=model_type,
         current_price=current_price,
         strike_price=strike_price,
